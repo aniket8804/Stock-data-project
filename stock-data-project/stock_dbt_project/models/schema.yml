@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: clean_stock
+    description: "Incremental cleaned stock streaming table"
+
+    columns:
+      - name: SYMBOL
+        description: "Stock ticker symbol"
+        tests:
+          - not_null
+
+      - name: PRICE
+        description: "Current stock price"
+        tests:
+          - not_null
+
+      - name: TIMESTAMP
+        description: "Timestamp when record was inserted"
+        tests:
+          - not_null
+
+      - name: symbol_timestamp
+        description: "Unique composite key"
+        tests:
+          - not_null
+          - unique
+
+# -------------------------
+# Custom Data Quality Tests
+# -------------------------
+
+tests:
+  - name: price_positive_test
+    description: "Ensure stock price is always positive"
+    config:
+      severity: error
+    sql: |
+      SELECT *
+      FROM {{ ref('clean_stock') }}
+      WHERE PRICE <= 0
